@@ -101,21 +101,21 @@ void ht_destroy (HashTable *ht)
 // if ret == nullptr, then value is in start
 // if ret->next is nullptr, then table doesn't contain value
 // otherwise ret->next contains value
-static TableEl *ht_lookup (TableEl *start, const char *value)
+static TableEl *ht_lookup (const TableEl *start, const char *value)
 {
     if (start->data == NULL)
-        return start;
+        return (TableEl *)start;
     if (strcmp (start->data, value) == 0)
         return NULL;
     
-    TableEl *iter = start;
+    const TableEl *iter = start;
     for (; iter->next != NULL; iter = iter->next)
     {
         if (strcmp (iter->next->data, value) == 0)
-            return iter;
+            return (TableEl *)iter;
     }
 
-    return iter;
+    return (TableEl *)iter;
 }
 
 static int ht_insertAfter (TableEl *toInsert, const char *value)
@@ -177,7 +177,7 @@ int ht_insert (HashTable *ht, const char *value)
     return HT_ALREADY_EXISTS;
 }
 
-bool ht_contains (HashTable *ht, const char *value)
+bool ht_contains (const HashTable *ht, const char *value)
 {
     size_t hash = ht_calcHash (value, ht->hashsize);
     TableEl *found = ht_lookup (&(ht->table[hash]), value);
@@ -225,7 +225,7 @@ bool ht_erase (HashTable *ht, const char *value)
     return true;
 }
 
-void ht_foreach (HashTable *ht, ht_iter_func_t *func, void *context)
+void ht_foreach (const HashTable *ht, ht_iter_func_t *func, void *context)
 {
     for (int i = 0; i < ht->hashsize; ++i)
     {
