@@ -225,6 +225,17 @@ bool ht_erase (HashTable *ht, const char *value)
     return true;
 }
 
+void ht_foreach (HashTable *ht, ht_iter_func_t *func, void *context)
+{
+    for (int i = 0; i < ht->hashsize; ++i)
+    {
+        if (ht->table[i].data != NULL)
+            (*func) (ht->table[i].data, context);
+
+        for (TableEl *iter = ht->table[i].next; iter != NULL; iter = iter->next)
+            (*func) (iter->data, context);
+    }
+}
 
 
 

@@ -203,6 +203,18 @@ void testEraseBackwards (HashTable *table)
     }
 }
 
+void foreachFunc (const char *str, void *context)
+{
+    static int numCall = 0;
+    printf ("foreachFunc: %3d: %s\n", numCall, str);
+    numCall++;
+}
+
+void testForeach (HashTable *table)
+{
+    ht_foreach (table, foreachFunc, NULL);
+}
+
 int main ()
 {
     #ifdef FAULT_INJ
@@ -224,6 +236,7 @@ int main ()
     testInsert (table);
     testEraseBackwards (table);
     testInsert (table);
+    testForeach (table);
 
     ht_destroy (table);
 }
