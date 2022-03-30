@@ -15,7 +15,7 @@ void testCreateDestroy ()
     ht_destroy (small);
 }
 
-static const char *testStrings [100] = 
+static const char *testStrings [100] =
 {
 "mfcfxfznrawzrhqpdjiritkakiyajojhntcsckflammlqdrpapzzzmnzfhvjbzlddgotojdsptaozswkiwxuktru",
 "gvojrgxxctqakmhgsrxkltgxvfkibyrbbdtfybgxpktzsuaoqyoxnendqmvkvtapckznustjvdqest",
@@ -119,7 +119,7 @@ static const char *testStrings [100] =
 "estrgvwprtnavgwhwbwrwcwwraexpvpsuomubywxnjybujdgtycemkzhatyrqmk"
 };
 
-static const char *testStrings2 [10] = 
+static const char *testStrings2 [10] =
 {
 "yntbpipqocxskdkzmsiewsmattkpijlxqeftasmjritdxgnzloecfqsycffzktfatkhqomzkipvhuqonkpxketozdfswxmnbkshc",
 "lvbvjpbketgoxxbrctyskchxzhlqutflpqrvcoemiqvggyonvejxqrxkqofveervklpahlmjfibmisvqnpxsujhtcofejhjknfct",
@@ -140,7 +140,8 @@ void testInsert (HashTable *table)
         ht_insert (table, testStrings[i]);
         const char *arrForTest [100];
         memcpy (arrForTest, testStrings, (i + 1) * sizeof (*arrForTest));
-        ht_testEquality (table, arrForTest, arrForTest + i + 1);
+        if (!ht_testEquality (table, arrForTest, arrForTest + i + 1))
+            fprintf (stderr, "EQUALITY TEST FAILED\n");
     }
 
 }
@@ -170,13 +171,14 @@ void testContains (HashTable *table)
 
 void testDoubleAdd (HashTable *table)
 {
-    const char * forTest = "otl10"; 
+    const char * forTest = "otl10";
     ht_insert (table, forTest);
     ht_insert (table, forTest);
-    ht_testEquality (table, &forTest, &forTest + 1);
+    if (!ht_testEquality (table, &forTest, &forTest + 1))
+        fprintf (stderr, "EQUALITY TEST FAILED\n");
     ht_erase (table, "otl10");
 
-    
+
 }
 
 void testErase (HashTable *table)
@@ -187,7 +189,8 @@ void testErase (HashTable *table)
         ht_erase (table, testStrings[i]);
         const char *arrForTest [100];
         memcpy (arrForTest, testStrings + i + 1, (99 - i) * sizeof (*arrForTest));
-        ht_testEquality (table, arrForTest, arrForTest + 99 - i);
+        if (!ht_testEquality (table, arrForTest, arrForTest + 99 - i))
+            fprintf (stderr, "EQUALITY TEST FAILED\n");
     }
 }
 
@@ -199,7 +202,8 @@ void testEraseBackwards (HashTable *table)
         ht_erase (table, testStrings[i]);
         const char *arrForTest [100];
         memcpy (arrForTest, testStrings, i * sizeof (*arrForTest));
-        ht_testEquality (table, arrForTest, arrForTest + i);
+        if (!ht_testEquality (table, arrForTest, arrForTest + i))
+            fprintf (stderr, "EQUALITY TEST FAILED\n");
     }
 }
 
@@ -223,9 +227,9 @@ int main ()
 
     testCreateDestroy ();
 
-    
+
     HashTable *table = ht_create (13);
-    if (table == NULL) 
+    if (table == NULL)
         return 0;
 
 

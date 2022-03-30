@@ -17,7 +17,7 @@ size_t ht_calcHash (const char* str, size_t hashsize)
     size_t a = 31415;
     size_t b = 27183;
     for (char c = *str;
-         c; 
+         c;
          c = *++str, a = a * b % (hashsize - 1))
     {
         ret = (a * ret + c) % hashsize;
@@ -60,13 +60,14 @@ HashTable *ht_create (size_t size)
     if (overflows (sizeof (HashTable), size, sizeof (TableEl)))
         return NULL;
 
-    HashTable *ht = (HashTable *) malloc (sizeof (HashTable) + size * sizeof (TableEl));
+    HashTable *ht = (HashTable *) malloc
+        (sizeof (HashTable) + size * sizeof (TableEl));
     if (ht == NULL || RANDOMLY_DIE)
     {
         free (ht);
         return NULL;
     }
-    
+
     ht->hashsize = size;
     memset (ht->table, '\0', size * sizeof (TableEl));
 
@@ -75,7 +76,7 @@ HashTable *ht_create (size_t size)
 
 void ht_destroy (HashTable *ht)
 {
-    if (ht == NULL) 
+    if (ht == NULL)
         return;
     for (int i = 0; i < ht->hashsize; ++i)
     {
@@ -107,7 +108,7 @@ static TableEl *ht_lookup (const TableEl *start, const char *value)
         return (TableEl *)start;
     if (strcmp (start->data, value) == 0)
         return NULL;
-    
+
     const TableEl *iter = start;
     for (; iter->next != NULL; iter = iter->next)
     {
@@ -196,7 +197,7 @@ bool ht_erase (HashTable *ht, const char *value)
         free (ht->table[hash].data);
         if (ht->table[hash].next == NULL)
         {
-            // value being erased was the only one with this hash, 
+            // value being erased was the only one with this hash,
             // everything is simple
             ht->table[hash].data = NULL;
             return true;
@@ -210,7 +211,7 @@ bool ht_erase (HashTable *ht, const char *value)
             free (tmp);
             return true;
         }
-        
+
     }
 
     if (found->next == NULL)
@@ -273,7 +274,7 @@ bool ht_testEquality (HashTable *ht, const char **start, const char **end)
     {
         if (ht->table[i].data != NULL)
             ok = ok && ht_exclude (ht->table[i].data, start, end);
-        
+
         for (TableEl *iter = ht->table[i].next; iter != NULL; iter = iter->next)
             ok = ok && ht_exclude (iter->data, start, end);
     }
