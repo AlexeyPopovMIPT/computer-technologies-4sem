@@ -8,7 +8,7 @@
 #include <time.h>
 static void *ht_malloc (size_t size)
 {
-    if (rand() % 16 == 0) 
+    if (rand() % 16 == 0)
         return NULL;
     return malloc (size);
 }
@@ -70,7 +70,7 @@ HashTable *ht_create (size_t size)
 
     HashTable *ht = (HashTable *) ht_malloc
         (sizeof (HashTable) + size * sizeof (TableEl));
-        
+
     if (ht == NULL)
         return NULL;
 
@@ -155,7 +155,7 @@ int ht_insert (HashTable *ht, const char *value)
 
     if (toInsert == NULL || toInsert->next != NULL)
         return HT_ALREADY_EXISTS;
-    
+
     if (toInsert->data != NULL)
         return ht_insertAfter (toInsert, value);
 
@@ -167,7 +167,7 @@ int ht_insert (HashTable *ht, const char *value)
         return HT_MEMORY_ERROR;
 
     memcpy (toInsert->data, value, len + 1);
-    return HT_OK; 
+    return HT_OK;
 }
 
 bool ht_contains (const HashTable *ht, const char *value)
