@@ -6,9 +6,17 @@
 
 #ifdef FAULT_INJ
 #include <time.h>
-#define RANDOMLY_DIE (rand() % 16 == 0)
+static void *ht_malloc (size_t size)
+{
+    if (rand() % 16 == 0) 
+        return NULL;
+    return malloc (size);
+}
 #else
-#define RANDOMLY_DIE 0
+static void *ht_malloc (size_t size)
+{
+    return malloc (size);
+}
 #endif
 
 size_t ht_calcHash (const char* str, size_t hashsize)
@@ -60,13 +68,11 @@ HashTable *ht_create (size_t size)
     if (overflows (sizeof (HashTable), size, sizeof (TableEl)))
         return NULL;
 
-    HashTable *ht = (HashTable *) malloc
+    HashTable *ht = (HashTable *) ht_malloc
         (sizeof (HashTable) + size * sizeof (TableEl));
-    if (ht == NULL || RANDOMLY_DIE)
-    {
-        free (ht);
+        
+    if (ht == NULL)
         return NULL;
-    }
 
     ht->hashsize = size;
     memset (ht->table, '\0', size * sizeof (TableEl));
@@ -123,21 +129,16 @@ static int ht_insertAfter (TableEl *toInsert, const char *value)
 {
     size_t len = strlen (value);
 
-    toInsert->next = (TableEl *) malloc (sizeof (TableEl));
+    toInsert->next = (TableEl *) ht_malloc (sizeof (TableEl));
 
-    if (toInsert->next == NULL || RANDOMLY_DIE)
-    {
-        free (toInsert->next);
-        toInsert->next = NULL;
+    if (toInsert->next == NULL)
         return HT_MEMORY_ERROR;
-    }
 
     toInsert->next->next = NULL;
-    toInsert->next->data = (char *) malloc (len + 1);
+    toInsert->next->data = (char *) ht_malloc (len + 1);
 
-    if (toInsert->next->data == NULL || RANDOMLY_DIE)
+    if (toInsert->next->data == NULL)
     {
-        free (toInsert->next->data);
         free (toInsert->next);
         toInsert->next = NULL;
         return HT_MEMORY_ERROR;
@@ -152,30 +153,21 @@ int ht_insert (HashTable *ht, const char *value)
     size_t hash = ht_calcHash (value, ht->hashsize);
     TableEl *toInsert = ht_lookup (&(ht->table[hash]), value);
 
-    if (toInsert != NULL && toInsert->next == NULL)
-    {
-        if (toInsert->data == NULL)
-        {
-            size_t len = strlen (value);
+    if (toInsert == NULL || toInsert->next != NULL)
+        return HT_ALREADY_EXISTS;
+    
+    if (toInsert->data != NULL)
+        return ht_insertAfter (toInsert, value);
 
-            toInsert->data = (char *) malloc (len + 1);
+    size_t len = strlen (value);
 
-            if (toInsert->data == NULL || RANDOMLY_DIE)
-            {
-                free (toInsert->data);
-                toInsert->data = NULL;
-                return HT_MEMORY_ERROR;
-            }
+    toInsert->data = (char *) ht_malloc (len + 1);
 
-            memcpy (toInsert->data, value, len + 1);
-            return HT_OK;
+    if (toInsert->data == NULL)
+        return HT_MEMORY_ERROR;
 
-        }
-        else
-            return ht_insertAfter (toInsert, value);
-    }
-
-    return HT_ALREADY_EXISTS;
+    memcpy (toInsert->data, value, len + 1);
+    return HT_OK; 
 }
 
 bool ht_contains (const HashTable *ht, const char *value)
