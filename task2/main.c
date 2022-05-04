@@ -12,14 +12,14 @@ double func (double x)
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT = 1e9;
-const double SEGM_LEN = (TO - FROM) / SEGM_CNT;
+const int SEGM_CNT_DEFAULT = 1e9;
 
 struct ThreadContext
 {
     int nCPU, segmsCnt;
     double from;
     double result;
+    double segmLen;
 };
 
 void usage (const char* argv0)
@@ -57,12 +57,12 @@ void *thrRoutine (void *context)
 
     if (pthread_setaffinity_np (tid, sizeof (cpu_set_t), &cpuSet) != 0)
     {
-        fprintf (stderr, "Error in pthread_attr_setaffinity_np for cpu %d\n", cxt->nCPU);
+        fprintf (stderr, "Error in pthread_setaffinity_np for cpu %d\n", cxt->nCPU);
     }
 
 
     for (int segm = 0; segm < cxt->segmsCnt; segm++)
-        cxt->result += SEGM_LEN * func (cxt->from + segm * SEGM_LEN);
+        cxt->result += cxt->segmLen * func (cxt->from + segm * cxt->segmLen);
 
     return NULL;
 }
@@ -82,7 +82,7 @@ int main (int argc, const char **argv)
         return 0;
     }
 
-    int segm_cnt = SEGM_CNT;
+    int segm_cnt = SEGM_CNT_DEFAULT;
     if (argc == 3)
     {
         segm_cnt = (int)(parseDouble (argv[2]) * segm_cnt);
@@ -92,6 +92,7 @@ int main (int argc, const char **argv)
             return 0;
         }
     }
+    const double segm_len = (TO - FROM) / segm_cnt;
 
     int exitcode = 0;
 
@@ -129,8 +130,10 @@ int main (int argc, const char **argv)
         arrsPerCPU[thr % nCPUs][thr / nCPUs].from = distributedTill;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].segmsCnt = nSegmsPerThread + 1;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].result = 0;
+        arrsPerCPU[thr % nCPUs][thr / nCPUs].segmLen = segm_len;
+        
 
-        distributedTill += (nSegmsPerThread + 1) * SEGM_LEN;
+        distributedTill += (nSegmsPerThread + 1) * segm_len;
     }
 
     for (; thr < nThreads; thr++)
@@ -139,8 +142,9 @@ int main (int argc, const char **argv)
         arrsPerCPU[thr % nCPUs][thr / nCPUs].from = distributedTill;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].segmsCnt = nSegmsPerThread;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].result = 0;
+        arrsPerCPU[thr % nCPUs][thr / nCPUs].segmLen = segm_len;
 
-        distributedTill += nSegmsPerThread * SEGM_LEN;
+        distributedTill += nSegmsPerThread * segm_len;
     }
 
     for (; thr < nThreads + nDummyThreads; thr++)
@@ -149,6 +153,7 @@ int main (int argc, const char **argv)
         arrsPerCPU[thr % nCPUs][thr / nCPUs].from = 0;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].segmsCnt = nSegmsPerThread;
         arrsPerCPU[thr % nCPUs][thr / nCPUs].result = 0;
+        arrsPerCPU[thr % nCPUs][thr / nCPUs].segmLen = segm_len;
     };
 
     for (thr = 0; thr < nThreads + nDummyThreads; thr++)
