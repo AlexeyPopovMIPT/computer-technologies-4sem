@@ -12,7 +12,7 @@ double func (double x)
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT_DEFAULT = 1e9;
+const int SEGM_CNT_DEFAULT = 1e8;
 
 struct ThreadContext
 {
@@ -158,7 +158,15 @@ int main (int argc, const char **argv)
 
     for (thr = 0; thr < nThreads + nDummyThreads; thr++)
     {
-        pthread_create (threadIDs + thr, NULL, thrRoutine, &(arrsPerCPU[thr % nCPUs][thr / nCPUs]));
+        if (
+        pthread_create (threadIDs + thr, NULL, thrRoutine, &(arrsPerCPU[thr % nCPUs][thr / nCPUs]))
+        != 0)
+        {
+            perror ("Error in pthread_create");
+            exitcode = -1;
+            goto cleanup;
+        }
+
     }
 
     double result = 0;
