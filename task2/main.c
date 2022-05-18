@@ -18,7 +18,7 @@ double func (double x)
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT_DEFAULT = 1e8;
+const int SEGM_CNT_DEFAULT = 1e8 * 4;
 
 struct ThreadContext
 {
