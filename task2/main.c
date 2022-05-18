@@ -1,9 +1,15 @@
+#ifndef CACHELINE_SIZE
+#define CACHELINE_SIZE 64
+#warning "CACHELINE_SIZE not defined: defaults to 64 bytes"
+#endif
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <assert.h>
 
 double func (double x)
 {
@@ -20,7 +26,11 @@ struct ThreadContext
     double from;
     double result;
     double segmLen;
-};
+    char fool [CACHELINE_SIZE - 32];
+} __attribute__((__aligned__(CACHELINE_SIZE)));
+
+static_assert (sizeof (struct ThreadContext) == CACHELINE_SIZE, 
+               "Error: sizeof (struct ThreadContext) != CACHELINE_SIZE");
 
 void usage (const char* argv0)
 {
@@ -160,7 +170,7 @@ int main (int argc, const char **argv)
     {
         if (
         pthread_create (threadIDs + thr, NULL, thrRoutine, &(arrsPerCPU[thr % nCPUs][thr / nCPUs]))
-        != 0)
+        != 0) 
         {
             perror ("Error in pthread_create");
             exitcode = -1;
