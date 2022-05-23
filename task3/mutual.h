@@ -51,8 +51,8 @@
 
 /* timeout constants */
 
-#define ACCEPT_TIMEOUT_SEC  0       /* in sec  waiting time in accept */
-#define ACCEPT_TIMEOUT_USEC 100000  /* in usec -//-                                                      */
+#define ACCEPT_TIMEOUT_SEC  1       /* in sec  waiting time in accept */
+#define ACCEPT_TIMEOUT_USEC 0       /* in usec -//-                                                      */
 
 #define CALC_TIMEOUT_SEC  3000000   /* in sec  allotted time for calculating the integral for the client    */
 #define CALC_TIMEOUT_USEC 0         /* in usec -//-                                                         */
