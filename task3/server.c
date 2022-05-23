@@ -3,7 +3,7 @@
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT_DEFAULT = 1e8 * 4;
+const int SEGM_CNT_DEFAULT = 1e8 * 8;
 
 int serverInt (int noPc, int segm_cnt);
 
