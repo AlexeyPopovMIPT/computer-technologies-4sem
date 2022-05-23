@@ -6,10 +6,6 @@
 #warning "CACHELINE_SIZE not defined: defaults to 64 bytes"
 #endif
 
-const double FROM  = 0;
-const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT_DEFAULT = 1e8 * 4;
-
 double func (double x)
 {
     return sin (x);
