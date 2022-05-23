@@ -82,9 +82,6 @@ void clientInt (int noThreads)
 
     close(bcsk);
 
-    //printf("SERVER TCP PORT = %d\n", servTcpPort);
-    //printf("SERVER ADDR = %s\n", inet_ntoa(peerAddr.sin_addr));
-
     bzero (&servAddr, sizeof (servAddr));
 
     servAddr.sin_family = AF_INET;
