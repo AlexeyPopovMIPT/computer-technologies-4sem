@@ -30,7 +30,6 @@ static_assert (sizeof (struct ThreadContext) == CACHELINE_SIZE,
 void *thrRoutine (void *context)
 {
     struct ThreadContext *cxt = (struct ThreadContext *) context;
-    fprintf (stderr, "Thread: integrate from %lf to %lf\n", cxt->from, cxt->from + cxt->segmLen * cxt->segmsCnt);
 
     cpu_set_t cpuSet;
     pthread_t tid = pthread_self ();
@@ -52,8 +51,6 @@ void *thrRoutine (void *context)
 
 double integrate (int nThreads, double normKoef, double from, double segm_len, int segm_cnt)
 {
-    fprintf (stderr, "Client: integrate from %lf %d segments\n", from, segm_cnt);
-
     double result = 0;
 
     int nCPUs = sysconf (_SC_NPROCESSORS_ONLN);

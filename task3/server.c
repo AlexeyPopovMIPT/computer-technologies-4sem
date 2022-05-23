@@ -181,7 +181,7 @@ int serverInt (int noPc, int segm_cnt)
     {
 	    clientFds[iClient] = accept(listenFd, NULL, NULL);
         
-        if (clientFds[iClient] < 0) /* EAGAIN == Resource temporarily unavailable */
+        if (clientFds[iClient] < 0)
         {
             if (errno == EAGAIN)
                 break;
@@ -212,8 +212,6 @@ int serverInt (int noPc, int segm_cnt)
         exitcode = 1;
         goto cleanup;
     }
-
-    fprintf(stderr, "%d clients found\n", foundClientsCount);
 
     /* from now time can be counted */
 
