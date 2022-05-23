@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <assert.h>
+#include <time.h>
 
 double func (double x)
 {
@@ -18,7 +19,7 @@ double func (double x)
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
-const int SEGM_CNT_DEFAULT = 1e8 * 4;
+const int SEGM_CNT_DEFAULT = 1e8 * 8;
 
 struct ThreadContext
 {
@@ -59,11 +60,15 @@ void *thrRoutine (void *context)
 {
     struct ThreadContext *cxt = (struct ThreadContext *) context;
 
+    printf ("Thread: %d segments\n", cxt->segmsCnt);
+
     cpu_set_t cpuSet;
     pthread_t tid = pthread_self ();
 
     CPU_ZERO (&cpuSet);
     CPU_SET (cxt->nCPU, &cpuSet);
+
+    const int _ = sizeof (cpu_set_t) < CPU_SETSIZE;
 
     if (pthread_setaffinity_np (tid, sizeof (cpu_set_t), &cpuSet) != 0)
     {
@@ -79,6 +84,10 @@ void *thrRoutine (void *context)
 
 int main (int argc, const char **argv)
 {
+    #ifdef SHOW_TIME
+    struct timespec begin, end;
+    clock_gettime (CLOCK_MONOTONIC, &begin);
+    #endif
     if (argc != 2 && argc != 3)
     {
         usage (argv[0]);
@@ -166,6 +175,11 @@ int main (int argc, const char **argv)
         arrsPerCPU[thr % nCPUs][thr / nCPUs].segmLen = segm_len;
     };
 
+    #ifdef SHOW_TIME
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    printf ("%lf s: thread contexts generated\n", (end.tv_sec - begin.tv_sec) + 1e-9 * (end.tv_nsec - begin.tv_nsec));
+    #endif
+
     for (thr = 0; thr < nThreads + nDummyThreads; thr++)
     {
         if (
@@ -193,6 +207,11 @@ int main (int argc, const char **argv)
         pthread_join (threadIDs[thr], NULL);
     }
 
+    #ifdef SHOW_TIME
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    printf ("%lf s: joined threads\n", (end.tv_sec - begin.tv_sec) + 1e-9 * (end.tv_nsec - begin.tv_nsec));
+    #endif
+
     
     cleanup:
 
@@ -203,6 +222,11 @@ int main (int argc, const char **argv)
             free (arrsPerCPU[i]);
         free (arrsPerCPU);
     }
+
+    #ifdef SHOW_TIME
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    printf ("%lf s: cleaned up\n", (end.tv_sec - begin.tv_sec) + 1e-9 * (end.tv_nsec - begin.tv_nsec));
+    #endif
 
     return exitcode;
 }
