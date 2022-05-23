@@ -1,5 +1,4 @@
 #include "mutual.h"
-#include <time.h>
 
 const double FROM  = 0;
 const double TO    = M_PI * 1e5 + M_PI;
@@ -14,7 +13,7 @@ void usage (const char *argv0)
 
 int main (int argc, char *argv[])
 {
-    if (argc != 2 && argc != 3 || strcmp (argv[1], "--help") == 0)
+    if ((argc != 2 && argc != 3) || strcmp (argv[1], "--help") == 0)
     {
         usage (argv[0]);
         return 0;
@@ -213,11 +212,6 @@ int serverInt (int noPc, int segm_cnt)
         goto cleanup;
     }
 
-    /* from now time can be counted */
-
-    struct timespec begin, end;
-    clock_gettime (CLOCK_MONOTONIC, &begin);
-
     /* got clients NOthreads to optimal divition of the work */
 
     size_t totalThreads = 0;
@@ -253,8 +247,7 @@ int serverInt (int noPc, int segm_cnt)
 
     for (int iClient = 0; iClient < foundClientsCount/*noPc*/; ++iClient)
     {
-        double intLength = (double)(TO - FROM) * clientThreadsCnt[iClient]
-                        / totalThreads;
+
         struct CalcInfo calcInfo = {
             .from = lastEnd,
             .segm_cnt = round (clientThreadsCnt[iClient] * segm_cnt / totalThreads),
@@ -292,10 +285,7 @@ int serverInt (int noPc, int segm_cnt)
         close(clientFds[iClient]);
     }
 
-    clock_gettime (CLOCK_MONOTONIC, &end);
-
     printf ("result = %lf\n", result);
-    printf ("%g seconds\n", (end.tv_sec - begin.tv_sec) + 1e-9 * (end.tv_nsec - begin.tv_nsec));
 
 cleanup:
     if (broadcastFd >= 0) close (broadcastFd);

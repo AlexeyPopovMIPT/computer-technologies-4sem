@@ -88,8 +88,6 @@ void clientInt (int noThreads)
     servAddr.sin_port   = htons(SERV_PORT);
     servAddr.sin_addr   = peerAddr.sin_addr;
 
-    socklen_t servAddrLen = sizeof (servAddr);
-
     /* connect to server */
 
     if ((sockFd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
